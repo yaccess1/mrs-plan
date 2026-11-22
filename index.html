@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1a1a8c">
+<title>Votre itinéraire – Maison Régionale des Sports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --indigo: #1a1a8c;      /* bleu de la borne */
+    --indigo-deep: #0f0f5c;
+    --blue: #3d5eff;        /* pastilles */
+    --gold: #ffc94f;        /* « Vous êtes ici » */
+    --ink: #1c2152;
+    --muted: #5d648f;
+    --paper: #f4f6fc;
+    --card: #ffffff;
+    --line: #dfe3f3;
+    --done: #a7adcb;
+    --bar-h: 88px;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 24px; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: 'Poppins', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px; line-height: 1.5;
+    padding-bottom: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+  }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 8px; }
+
+  /* ---------- Destination ---------- */
+  .hero {
+    position: relative; overflow: hidden;
+    background: radial-gradient(120% 90% at 85% 0%, #3434c9 0%, var(--indigo) 45%, var(--indigo-deep) 100%);
+    color: #fff;
+    padding: calc(26px + env(safe-area-inset-top, 0px)) 24px 30px;
+  }
+  .hero::after { /* rappel discret du tracé */
+    content: ''; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 26px rgba(255, 255, 255, 0.03);
+  }
+  .hero-place { font-size: 14px; color: #c3cbff; margin: 0; }
+  .hero h1 { margin: 6px 0 0; font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; max-width: 16ch; }
+  .hero-sub { margin: 8px 0 0; font-size: 15px; color: #dfe3ff; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip { font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #fff; }
+  .chip.gold { background: var(--gold); color: var(--indigo-deep); }
+
+  /* ---------- Parcours ---------- */
+  .route { position: relative; padding: 26px 18px 8px 18px; margin: 0; list-style: none; }
+  .route::before { /* la ligne du parcours */
+    content: ''; position: absolute; left: 37px; top: 40px; bottom: 56px; width: 4px; border-radius: 4px;
+    background: linear-gradient(var(--gold), var(--blue));
+  }
+  .route.single::before { display: none; }
+  .stop { position: relative; padding-left: 54px; margin-bottom: 22px; }
+  .stop-dot {
+    position: absolute; left: 7px; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 13px; font-weight: 700;
+    background: var(--card); color: var(--indigo); border: 3px solid var(--blue);
+    transition: background 0.25s, border-color 0.25s, color 0.25s;
+  }
+  .stop.start .stop-dot { background: var(--gold); border-color: #fff; color: var(--indigo-deep); box-shadow: 0 0 0 3px var(--gold); }
+  .stop.goal .stop-dot { background: var(--blue); border-color: #fff; color: #fff; box-shadow: 0 0 0 3px var(--blue); }
+  .stop-label { margin: 0; font-size: 13px; color: var(--muted); }
+  .stop-title { margin: 1px 0 0; font-size: 19px; font-weight: 600; line-height: 1.3; color: var(--ink); }
+  .stop-text { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+
+  .stop-body { margin-top: 12px; }
+  .plan-card { background: var(--card); border-radius: 20px; border: 1px solid var(--line); overflow: hidden; }
+  .plan-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 0 16px; }
+  .plan-name { font-size: 13px; color: var(--muted); }
+  .zoom-btn {
+    flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer;
+    padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: #eef1ff; color: var(--indigo);
+  }
+  .zoom-btn svg { width: 16px; height: 16px; }
+  .plan-area { padding: 8px 8px 14px; }
+  .plan-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .plan-scroll::-webkit-scrollbar { display: none; }
+  .swipe { display: block; text-align: center; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* États des étapes */
+  .stop.is-done .stop-dot { background: var(--done); border-color: #fff; color: #fff; box-shadow: none; }
+  .stop.is-done .stop-title { color: var(--done); }
+  .stop.is-done .stop-text, .stop.is-done .stop-body { display: none; }
+  .stop.is-later .stop-body { opacity: 0.55; }
+  .stop.is-active .stop-title { color: var(--indigo); }
+
+  /* Arrivée */
+  .arrival { margin: 0 18px 24px 72px; padding: 16px 18px; border-radius: 18px; background: #e9edff; color: var(--indigo); font-size: 15px; }
+  .arrival strong { display: block; font-size: 16px; }
+
+  /* ---------- Plan ---------- */
+  .plan-iso { position: relative; margin: 0 auto; }
+  .plan-iso svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .plan-shadow { fill: rgba(25, 25, 152, 0.07); }
+  .plan-floor { fill: #f7f8ff; stroke: #b9c0e3; stroke-width: 1; }
+  .plan-floor.hall { fill: #eef1ff; } .plan-floor.room { fill: #e8ecff; } .plan-floor.office { fill: #eaf4ff; }
+  .plan-floor.service { fill: #f1f3fb; } .plan-floor.tech { fill: #e4e6f0; } .plan-floor.corridor { fill: #fbfbff; }
+  .plan-floor.lobby { fill: #f3f5ff; } .plan-floor.accent { fill: #dde4ff; } .plan-floor.counter { fill: #c9d3ff; }
+  .plan-floor.sas { fill: #ffffff; stroke-dasharray: 4 3; }
+  .plan-floor.stairs { fill: url(#stairs); stroke: #9aa3cf; }
+  .plan-floor.outdoor { fill: url(#outdoor); stroke: #c9cfe8; stroke-dasharray: 6 5; }
+  .stairs-line { stroke: #9aa3cf; stroke-width: 3; } .outdoor-line { stroke: #dde2f5; stroke-width: 2; }
+  .plan-wall { stroke: #9aa3cf; stroke-width: 0.8; stroke-linejoin: round; }
+  .plan-wall.x { fill: rgba(255, 255, 255, 0.92); } .plan-wall.y { fill: rgba(226, 231, 250, 0.92); }
+  .plan-wall-top { stroke: #4b548f; stroke-width: 1.6; stroke-linecap: round; }
+  .plan-column line { stroke: #7d86bb; stroke-width: 3; } .plan-column ellipse { fill: #fff; stroke: #7d86bb; stroke-width: 1.2; }
+  .plan-label { fill: #2a3170; font-weight: 600; paint-order: stroke; stroke: rgba(255, 255, 255, 0.9); stroke-width: 3px; }
+
+  .marker { position: absolute; z-index: 3; width: 0; height: 0; pointer-events: none; }
+  .marker-dot { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(20, 20, 110, 0.3); }
+  .marker-dot::before { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 3px solid currentColor; animation: pulse 2.2s ease-out infinite; }
+  .marker-label { position: absolute; bottom: 17px; left: 0; transform: translateX(-50%); padding: 5px 10px; border-radius: 9px; font-size: 12px; font-weight: 700; white-space: nowrap; box-shadow: 0 6px 14px rgba(20, 20, 110, 0.22); }
+  .marker.start .marker-dot { background: var(--gold); color: rgba(255, 201, 79, 0.85); }
+  .marker.start .marker-label { background: var(--gold); color: var(--indigo-deep); bottom: auto; top: 17px; }
+  .marker.goal .marker-dot { background: var(--blue); color: rgba(61, 94, 255, 0.6); }
+  .marker.goal .marker-label { background: var(--indigo); color: #fff; }
+  .marker.vers-droite .marker-label { left: auto; right: -14px; transform: none; }
+  .marker.vers-gauche .marker-label { left: -14px; transform: none; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+
+  /* ---------- Barre du bas (zone du pouce) ---------- */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: rgba(244, 246, 252, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .progress { display: flex; gap: 6px; flex-shrink: 0; }
+  .progress span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background 0.25s, width 0.25s; }
+  .progress span.on { width: 22px; border-radius: 8px; background: var(--indigo); }
+  .progress span.ok { background: var(--done); }
+  .next {
+    flex: 1; min-height: 56px; border: none; border-radius: 16px; cursor: pointer;
+    font-size: 17px; font-weight: 600; color: #fff; background: var(--indigo);
+    box-shadow: 0 8px 20px rgba(26, 26, 140, 0.28);
+  }
+  .next:active { transform: scale(0.98); }
+  .next.finished { background: var(--blue); }
+
+  /* ---------- Plan en grand ---------- */
+  .viewer { position: fixed; inset: 0; z-index: 20; background: var(--paper); display: none; flex-direction: column; }
+  .viewer.open { display: flex; }
+  .viewer-head { display: flex; align-items: center; gap: 12px; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 10px; }
+  .viewer-head p { margin: 0; flex: 1; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .close-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: #e4e8fb; color: var(--indigo); display: grid; place-items: center; cursor: pointer; }
+  .close-btn svg { width: 20px; height: 20px; }
+  .viewer-body { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; padding: 12px; }
+  .viewer-hint { text-align: center; font-size: 12px; color: var(--muted); padding: 6px 16px calc(14px + env(safe-area-inset-bottom, 0px)); }
+
+  .error { margin: 32px 20px; }
+  .error h1 { font-size: 22px; margin: 0 0 8px; color: var(--indigo); }
+  .error p { margin: 0; color: var(--muted); }
+  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 4px 24px 20px; }
+
+
+  /* ---------- Logo de la Région : arrivée animée ---------- */
+  .hero { padding-right: 24px; }
+  .logo-slot {
+    position: absolute; z-index: 2; top: calc(18px + env(safe-area-inset-top, 0px)); right: 18px;
+    height: 34px; width: auto; border-radius: 7px; box-shadow: 0 6px 16px rgba(5, 5, 50, 0.35);
+    opacity: 0; transform-origin: 50% 100%;
+  }
+  .logo-slot.pose { opacity: 1; animation: flotte 5s ease-in-out infinite; }
+  @keyframes flotte {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-2px) rotate(-0.6deg); }
+  }
+  .hero-place { padding-right: 120px; }
+  .splash {
+    position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
+    background: radial-gradient(120% 90% at 85% 0%, #3434c9 0%, var(--indigo) 45%, var(--indigo-deep) 100%);
+    transition: opacity 0.5s ease;
+  }
+  .splash.fondu { opacity: 0; pointer-events: none; }
+  .splash img { width: min(62vw, 260px); height: auto; border-radius: 16px; box-shadow: 0 18px 40px rgba(5, 5, 50, 0.45); animation: respire 1.6s ease-in-out infinite; }
+  @keyframes respire { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.02); } }
+  .vol { position: fixed; z-index: 31; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; border-radius: 16px; }
+  @media (prefers-reduced-motion: reduce) { .logo-slot.pose { animation: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<div class="splash" id="splash" aria-hidden="true"><img src="logo-rge.jpg" alt=""></div>
+<div id="app"></div>
+<footer>Maison Régionale des Sports, 13 rue Jean Moulin, 54510 Tomblaine</footer>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="viewer-title">
+  <div class="viewer-head">
+    <p id="viewer-title"></p>
+    <button class="close-btn" id="viewer-close" aria-label="Fermer le plan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="viewer-body" id="viewer-body"></div>
+  <div class="viewer-hint">Faites glisser pour vous déplacer, pincez pour zoomer</div>
+</div>
+
+<script type="module">
+import { PLANS } from './plans.js';
+
+const BATIMENTS = { D: 'à droite en sortant de l’accueil', G: 'à gauche en sortant de l’accueil' };
+const ENTREES = { D: 'vers_c', G: 'vers_accueil' };   // où l'on arrive dans chaque bâtiment
+const SORTIES = { D: 'vers_d', G: 'vers_g' };         // sortie de l'accueil vers chaque bâtiment
+const etage = (f) => f === -1 ? 'sous-sol' : f === 0 ? 'rez-de-chaussée' : f === 1 ? '1er étage' : `${f}e étage`;
+const Etage = (f) => { const s = etage(f); return s[0].toUpperCase() + s.slice(1); };
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- Dessin du plan (même projection que la borne) ----------
+const K = 0.62, SKEW = 0.08;
+const proj = (x, y, z = 0) => [x + y * SKEW, y * K - z];
+let uid = 0;
+
+function dessinerPlan(plan, marqueurs, mode) {
+  const H = plan.wallHeight || 30;
+  const rect = (r) => [[r.x0, r.y0], [r.x1, r.y0], [r.x1, r.y1], [r.x0, r.y1]];
+  const pts = (arr) => arr.map((p) => p.join(',')).join(' ');
+  const murs = [];
+  plan.rooms.forEach((r) => {
+    const open = r.open || [];
+    const bords = { top: [[r.x0, r.y0], [r.x1, r.y0]], right: [[r.x1, r.y0], [r.x1, r.y1]], bottom: [[r.x1, r.y1], [r.x0, r.y1]], left: [[r.x0, r.y1], [r.x0, r.y0]] };
+    Object.entries(bords).forEach(([cote, [a, b]]) => {
+      if (open.includes(cote)) return;
+      murs.push({ p: [proj(a[0], a[1]), proj(b[0], b[1]), proj(b[0], b[1], H), proj(a[0], a[1], H)],
+        t: [proj(a[0], a[1], H), proj(b[0], b[1], H)], d: (a[1] + b[1]) / 2 + (a[0] + b[0]) * 0.0001,
+        f: cote === 'top' || cote === 'bottom' ? 'x' : 'y' });
+    });
+  });
+  murs.sort((m1, m2) => m1.d - m2.d);
+
+  const tous = [...plan.floors, ...plan.rooms].flatMap((r) => rect(r).flatMap(([x, y]) => [proj(x, y), proj(x, y, H)]));
+  const xs = tous.map((p) => p[0]), ys = tous.map((p) => p[1]);
+  const pad = (Math.max(...xs) - Math.min(...xs)) * 0.06;
+  const minX = Math.min(...xs) - pad, minY = Math.min(...ys) - pad * 2;
+  const w = Math.max(...xs) - minX + pad, h = Math.max(...ys) - minY + pad;
+  const pos = ([x, y]) => `left:${((x - minX) / w) * 100}%;top:${((y - minY) / h) * 100}%`;
+  const fs = plan.labelSize || 16;
+  const large = w / h > 2.4;
+  const sousMarqueur = (r) => marqueurs.some((m) => m.x >= r.x0 && m.x <= r.x1 && m.y >= r.y0 && m.y <= r.y1);
+  const id = ++uid;
+
+  let svg = `<svg viewBox="${minX} ${minY} ${w} ${h}" aria-hidden="true"><defs>
+    <pattern id="stairs${id}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(90)"><line x1="0" y1="0" x2="0" y2="8" class="stairs-line"/></pattern>
+    <pattern id="outdoor${id}" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="12" class="outdoor-line"/></pattern></defs>`;
+  plan.rooms.forEach((r) => { svg += `<polygon class="plan-shadow" points="${pts(rect(r).map(([x, y]) => proj(x + 8, y + 14)))}"/>`; });
+  [...plan.floors, ...plan.rooms].forEach((r) => {
+    const motif = r.style === 'stairs' ? ` style="fill:url(#stairs${id})"` : r.style === 'outdoor' ? ` style="fill:url(#outdoor${id})"` : '';
+    svg += `<polygon class="plan-floor ${r.style}"${motif} points="${pts(rect(r).map(([x, y]) => proj(x, y)))}"/>`;
+  });
+  (plan.columns || []).forEach(([x, y]) => { const [bx, by] = proj(x, y); const [, ty] = proj(x, y, H);
+    svg += `<g class="plan-column"><line x1="${bx}" y1="${by}" x2="${bx}" y2="${ty}"/><ellipse cx="${bx}" cy="${ty}" rx="4" ry="2.5"/></g>`; });
+  murs.forEach((m) => { svg += `<polygon class="plan-wall ${m.f}" points="${pts(m.p)}"/><line class="plan-wall-top" x1="${m.t[0][0]}" y1="${m.t[0][1]}" x2="${m.t[1][0]}" y2="${m.t[1][1]}"/>`; });
+  plan.rooms.filter((r) => r.name && !sousMarqueur(r)).forEach((r) => {
+    const [cx, cy] = proj((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2 - (r.y1 - r.y0) * 0.18);
+    svg += `<text x="${cx}" y="${cy}" class="plan-label" font-size="${fs}" text-anchor="middle">${esc(r.name)}</text>`;
+  });
+  svg += '</svg>';
+
+  const grand = mode === 'grand';
+  const html = marqueurs.map((m) => {
+    const r = (proj(m.x, m.y, 2)[0] - minX) / w;
+    const cote = large || grand ? '' : r > 0.72 ? ' vers-droite' : r < 0.28 ? ' vers-gauche' : '';
+    return `<div class="marker ${m.type}${cote}" style="${pos(proj(m.x, m.y, 2))}"><span class="marker-dot"></span><span class="marker-label">${esc(m.label)}</span></div>`;
+  }).join('');
+
+  let taille;
+  if (grand) {
+    const hauteur = Math.round(window.innerHeight * 0.68);
+    const largeur = Math.max(window.innerWidth * 1.6, hauteur * (w / h));
+    taille = `width:${Math.round(largeur)}px;height:${Math.round(largeur * (h / w))}px`;
+  } else {
+    taille = large ? `height:260px;width:${Math.round(260 * (w / h))}px` : `aspect-ratio:${w} / ${h};width:100%`;
+  }
+  const dernier = marqueurs[marqueurs.length - 1];
+  const focus = dernier ? (proj(dernier.x, dernier.y)[0] - minX) / w : 0.5;
+  const focusY = dernier ? (proj(dernier.x, dernier.y)[1] - minY) / h : 0.5;
+  const plan_ = `<div class="plan-iso" style="${taille}">${svg}${html}</div>`;
+  if (grand) return { html: plan_, focus, focusY };
+  return {
+    html: large ? `<div class="plan-scroll" data-focus="${focus}">${plan_}</div><span class="swipe">Faites glisser le plan pour l’explorer</span>` : plan_,
+  };
+}
+
+// ---------- Construction de l'itinéraire ----------
+function trouver(plan, id, n) {
+  const memes = plan.pastilles.filter((p) => p.id === id);
+  return memes[n] || memes[0] || null;
+}
+
+function etapes(cle, cible) {
+  const [bat, f] = cle.split(':'); const fl = Number(f);
+  const accueil = PLANS['C:0'];
+  const depart = accueil.here && { type: 'start', label: 'Vous partez d’ici', x: accueil.here.x, y: accueil.here.y };
+  const but = { type: 'goal', label: cible.label, x: cible.x, y: cible.y };
+  const liste = [];
+
+  if (cle === 'C:0') {
+    liste.push({ type: 'goal', label: 'Depuis l’accueil', titre: `Rejoignez ${cible.label}`, texte: cible.sub, cle: 'C:0', marqueurs: [depart, but] });
+    return liste;
+  }
+  const sortie = trouver(accueil, SORTIES[bat], 0);
+  liste.push({
+    type: 'start', label: 'Départ, accueil du bâtiment C',
+    titre: `Allez vers le bâtiment ${bat}`, texte: `Il se trouve ${BATIMENTS[bat] || 'à côté de l’accueil'}.`,
+    cle: 'C:0', marqueurs: [depart, sortie && { type: 'goal', label: `Bâtiment ${bat}`, x: sortie.x, y: sortie.y }],
+  });
+  const rdc = PLANS[`${bat}:0`];
+  const entree = rdc && trouver(rdc, ENTREES[bat], 0);
+  const arrivee = entree && { type: 'start', label: 'Vous arrivez ici', x: entree.x, y: entree.y };
+  if (fl === 0) {
+    liste.push({ type: 'goal', label: `Bâtiment ${bat}, rez-de-chaussée`, titre: `Rejoignez ${cible.label}`, texte: cible.sub, cle, marqueurs: [arrivee, but] });
+  } else {
+    liste.push({
+      type: 'move', label: `Bâtiment ${bat}, rez-de-chaussée`,
+      titre: fl < 0 ? 'Descendez au sous-sol' : `Montez au ${etage(fl)}`,
+      texte: 'Par l’escalier ou l’ascenseur.', cle: `${bat}:0`, marqueurs: [arrivee],
+    });
+    liste.push({ type: 'goal', label: `Bâtiment ${bat}, ${etage(fl)}`, titre: `Rejoignez ${cible.label}`, texte: cible.sub, cle, marqueurs: [but] });
+  }
+  return liste.map((e) => ({ ...e, marqueurs: e.marqueurs.filter(Boolean) }));
+}
+
+// ---------- Affichage ----------
+const app = document.getElementById('app');
+const q = new URLSearchParams(location.search);
+const cle = q.get('p'), id = q.get('id'), n = Number(q.get('n') || 0);
+const planCible = cle && PLANS[cle];
+const cible = planCible && id && trouver(planCible, id, n);
+
+if (!cible) {
+  document.body.style.paddingBottom = '0';
+  app.innerHTML = `<div class="hero"><img class="logo-slot" id="logo" src="logo-rge.jpg" alt="La Région Grand Est"><p class="hero-place">Maison Régionale des Sports</p><h1>Itinéraire introuvable</h1></div>
+    <div class="error"><p>Ce lien ne correspond à aucun lieu. Scannez de nouveau le QR code sur la borne d’accueil.</p></div>`;
+} else {
+  const [bat, f] = cle.split(':');
+  const liste = etapes(cle, cible);
+  document.title = `${cible.label} – Votre itinéraire`;
+  let actif = 0;
+
+  const loupe = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></svg>`;
+  let html = `<header class="hero">
+      <img class="logo-slot" id="logo" src="logo-rge.jpg" alt="La Région Grand Est">
+      <p class="hero-place">Votre itinéraire vers</p>
+      <h1>${esc(cible.label)}</h1>
+      ${cible.sub ? `<p class="hero-sub">${esc(cible.sub)}</p>` : ''}
+      <div class="chips"><span class="chip gold">Bâtiment ${esc(bat)}</span><span class="chip">${esc(Etage(Number(f)))}</span></div>
+    </header>
+    <ol class="route${liste.length === 1 ? ' single' : ''}" id="route">`;
+  liste.forEach((e, i) => {
+    const dessin = dessinerPlan(PLANS[e.cle], e.marqueurs);
+    const dot = e.type === 'goal' ? '' : i + 1;
+    html += `<li class="stop ${e.type}" data-i="${i}">
+      <span class="stop-dot" aria-hidden="true">${dot}</span>
+      <p class="stop-label">${esc(e.label)}</p>
+      <h2 class="stop-title">${esc(e.titre)}</h2>
+      ${e.texte ? `<p class="stop-text">${esc(e.texte)}</p>` : ''}
+      <div class="stop-body"><div class="plan-card">
+        <div class="plan-head"><span class="plan-name">${esc(PLANS[e.cle].titre)}</span>
+          <button class="zoom-btn" data-zoom="${i}">${loupe}Agrandir</button></div>
+        <div class="plan-area">${dessin.html}</div>
+      </div></div>
+    </li>`;
+  });
+  html += `</ol>
+    <div class="arrival" id="arrival" hidden><strong>Vous êtes arrivé.</strong>Besoin d’aide ? L’accueil, au bâtiment C, est ouvert du lundi au vendredi, de 8 h à 17 h.</div>
+    <nav class="bar" aria-label="Progression">
+      ${liste.length > 1 ? `<div class="progress" id="progress">${liste.map(() => '<span></span>').join('')}</div>` : ''}
+      <button class="next" id="next"></button>
+    </nav>`;
+  app.innerHTML = html;
+
+  // Plans très larges : on centre sur le point d'intérêt
+  document.querySelectorAll('.plan-scroll').forEach((box) => {
+    box.scrollLeft = Number(box.dataset.focus || 0.5) * box.scrollWidth - box.clientWidth / 2;
+  });
+
+  const stops = [...document.querySelectorAll('.stop')];
+  const btn = document.getElementById('next');
+  const dots = [...document.querySelectorAll('#progress span')];
+  const arrival = document.getElementById('arrival');
+
+  function maj(defiler) {
+    const fini = actif >= liste.length;
+    stops.forEach((s, i) => {
+      s.classList.toggle('is-done', i < actif);
+      s.classList.toggle('is-active', i === actif);
+      s.classList.toggle('is-later', i > actif);
+      const d = s.querySelector('.stop-dot');
+      if (i < actif) d.textContent = '✓';
+      else d.textContent = liste[i].type === 'goal' ? '' : i + 1;
+    });
+    dots.forEach((d, i) => { d.className = i < actif ? 'ok' : i === actif ? 'on' : ''; });
+    arrival.hidden = !fini;
+    if (fini) { btn.textContent = 'Revoir l’itinéraire'; btn.classList.add('finished'); }
+    else { btn.classList.remove('finished'); btn.textContent = actif === liste.length - 1 ? 'Je suis arrivé' : 'Étape suivante'; }
+    if (defiler) {
+      const cibleScroll = fini ? arrival : stops[actif];
+      cibleScroll.scrollIntoView({ behavior: reduit ? 'auto' : 'smooth', block: 'start' });
+    }
+  }
+  btn.addEventListener('click', () => {
+    if (actif >= liste.length) { actif = 0; maj(false); window.scrollTo({ top: 0, behavior: reduit ? 'auto' : 'smooth' }); return; }
+    actif += 1; maj(true);
+  });
+  maj(false);
+
+  // Plan en grand
+  const viewer = document.getElementById('viewer');
+  const vBody = document.getElementById('viewer-body');
+  document.querySelectorAll('[data-zoom]').forEach((b) => b.addEventListener('click', () => {
+    const e = liste[Number(b.dataset.zoom)];
+    document.getElementById('viewer-title').textContent = PLANS[e.cle].titre;
+    const d = dessinerPlan(PLANS[e.cle], e.marqueurs, 'grand');
+    vBody.innerHTML = d.html;
+    viewer.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => {
+      vBody.scrollLeft = d.focus * vBody.scrollWidth - vBody.clientWidth / 2;
+      vBody.scrollTop = d.focusY * vBody.scrollHeight - vBody.clientHeight / 2;
+    });
+    document.getElementById('viewer-close').focus();
+  }));
+  const fermer = () => { viewer.classList.remove('open'); document.body.style.overflow = ''; };
+  document.getElementById('viewer-close').addEventListener('click', fermer);
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') fermer(); });
+}
+// ---------- Arrivée du logo : il quitte l'écran de chargement et « atterrit » en haut à droite ----------
+function atterrir() {
+  const splash = document.getElementById('splash');
+  const logo = document.getElementById('logo');
+  if (!splash || !logo) return;
+  const source = splash.querySelector('img');
+  const fin = () => { logo.classList.add('pose'); splash.remove(); };
+  if (reduit || !source.complete || !source.naturalWidth || !logo.animate) { splash.classList.add('fondu'); setTimeout(fin, 500); logo.style.opacity = 1; return; }
+  const a = source.getBoundingClientRect(), b = logo.getBoundingClientRect();
+  const vol = source.cloneNode(); vol.className = 'vol';
+  vol.style.width = `${a.width}px`; vol.style.height = `${a.height}px`;
+  document.body.appendChild(vol);
+  source.style.visibility = 'hidden';
+  splash.classList.add('fondu');
+  const k = b.width / a.width;               // taille d'arrivée
+  const T = (x, y, sx, sy = sx) => `translate(${x}px, ${y}px) scale(${sx}, ${sy})`;
+  const bx = b.left, by = b.top, h = b.height;
+  // Petit rebond à l'arrivée : il descend un peu trop, s'écrase légèrement, puis se pose
+  vol.animate([
+    { transform: T(a.left, a.top, 1), offset: 0, easing: 'cubic-bezier(0.55, 0, 0.25, 1)' },
+    { transform: T(bx, by - h * 0.55, k * 1.04), offset: 0.68, easing: 'ease-in' },
+    { transform: T(bx - b.width * 0.03, by + h * 0.08, k * 1.06, k * 0.88), offset: 0.8, easing: 'ease-out' },
+    { transform: T(bx, by - h * 0.12, k * 0.98, k * 1.03), offset: 0.9, easing: 'ease-in-out' },
+    { transform: T(bx, by, k), offset: 1 },
+  ], { duration: 1150, fill: 'forwards' }).onfinish = () => { logo.style.opacity = ''; logo.classList.add('pose'); vol.remove(); splash.remove(); };
+}
+const depart = performance.now();
+const lancer = () => setTimeout(atterrir, Math.max(0, 900 - (performance.now() - depart)));
+if (document.readyState === 'complete') lancer(); else window.addEventListener('load', lancer);
+</script>
+</body>
+</html>
