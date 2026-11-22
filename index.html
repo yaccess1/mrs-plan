@@ -4,24 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#1a1a8c">
+<meta name="theme-color" content="#14147a">
 <title>Votre itinéraire – Maison Régionale des Sports</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
 <style>
   :root {
-    --indigo: #1a1a8c;      /* bleu de la borne */
-    --indigo-deep: #0f0f5c;
-    --blue: #3d5eff;        /* pastilles */
-    --gold: #ffc94f;        /* « Vous êtes ici » */
+    --indigo: #1a1a8c;
+    --indigo-deep: #0c0c4f;
+    --blue: #3d5eff;
+    --ice: #8fd3ff;
+    --gold: #ffc94f;
+    --green: #16a34a;
+    --green-light: #34d399;
     --ink: #1c2152;
     --muted: #5d648f;
-    --paper: #f4f6fc;
+    --paper: #f3f5fd;
     --card: #ffffff;
     --line: #dfe3f3;
     --done: #a7adcb;
-    --bar-h: 88px;
     color-scheme: light;
   }
   * { box-sizing: border-box; }
@@ -30,33 +32,73 @@
     margin: 0; background: var(--paper); color: var(--ink);
     font-family: 'Poppins', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     font-size: 16px; line-height: 1.5;
-    padding-bottom: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    overflow-x: hidden;
   }
   button { font: inherit; color: inherit; }
-  :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 8px; }
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 10px; }
 
-  /* ---------- Destination ---------- */
+  /* ---------- Ambiance de fond (toute la page) ---------- */
+  .ambiance { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .ambiance::before { /* trame de points, façon écran */
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(26, 26, 140, 0.13) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  }
+  .halo { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.55; }
+  .halo.a { width: 340px; height: 340px; background: #c9d4ff; left: -120px; top: 35%; animation: derive-a 22s ease-in-out infinite; }
+  .halo.b { width: 300px; height: 300px; background: #ffe7ad; right: -110px; top: 62%; animation: derive-b 26s ease-in-out infinite; opacity: 0.45; }
+  .halo.c { width: 260px; height: 260px; background: #bfeaff; left: 30%; top: 85%; animation: derive-a 30s ease-in-out infinite reverse; opacity: 0.4; }
+  @keyframes derive-a { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(60px, -80px); } }
+  @keyframes derive-b { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-70px, -50px); } }
+  .scan { /* fine ligne lumineuse qui balaie l'écran, très lentement */
+    position: absolute; left: 0; right: 0; height: 120px; top: -120px;
+    background: linear-gradient(180deg, transparent, rgba(61, 94, 255, 0.06), transparent);
+    animation: balaye 11s linear infinite;
+  }
+  @keyframes balaye { from { transform: translateY(0); } to { transform: translateY(calc(100vh + 240px)); } }
+
+  /* ---------- En-tête : destination ---------- */
   .hero {
-    position: relative; overflow: hidden;
-    background: radial-gradient(120% 90% at 85% 0%, #3434c9 0%, var(--indigo) 45%, var(--indigo-deep) 100%);
+    position: relative; overflow: hidden; isolation: isolate;
+    background: radial-gradient(120% 100% at 90% 0%, #3535cf 0%, var(--indigo) 42%, var(--indigo-deep) 100%);
     color: #fff;
-    padding: calc(26px + env(safe-area-inset-top, 0px)) 24px 30px;
+    padding: calc(30px + env(safe-area-inset-top, 0px)) 24px 34px;
+    border-radius: 0 0 28px 28px;
+    box-shadow: 0 18px 40px rgba(12, 12, 79, 0.25);
   }
-  .hero::after { /* rappel discret du tracé */
-    content: ''; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 26px rgba(255, 255, 255, 0.03);
-  }
-  .hero-place { font-size: 14px; color: #c3cbff; margin: 0; }
-  .hero h1 { margin: 6px 0 0; font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; max-width: 16ch; }
+  .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+  .hero-place { font-size: 14px; color: #c3cbff; margin: 0; padding-right: 120px; }
+  .hero h1 { margin: 6px 0 0; font-size: 31px; line-height: 1.12; font-weight: 700; letter-spacing: -0.015em; max-width: 15ch; text-shadow: 0 2px 20px rgba(10, 10, 60, 0.5); }
   .hero-sub { margin: 8px 0 0; font-size: 15px; color: #dfe3ff; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-  .chip { font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #fff; }
-  .chip.gold { background: var(--gold); color: var(--indigo-deep); }
+  .chip { font-size: 14px; font-weight: 600; padding: 6px 13px; border-radius: 999px; background: rgba(255, 255, 255, 0.13); color: #fff; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(255, 255, 255, 0.16); }
+  .chip.gold { background: var(--gold); color: var(--indigo-deep); border-color: transparent; }
+
+  /* Logo de la Région */
+  .logo-slot {
+    position: absolute; z-index: 2; top: calc(20px + env(safe-area-inset-top, 0px)); right: 18px;
+    height: 34px; width: auto; border-radius: 7px; box-shadow: 0 6px 16px rgba(5, 5, 50, 0.35);
+    opacity: 0; transform-origin: 50% 100%;
+  }
+  .logo-slot.pose { opacity: 1; animation: flotte 5s ease-in-out infinite; }
+  @keyframes flotte { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-2px) rotate(-0.6deg); } }
+  .splash {
+    position: fixed; inset: 0; z-index: 40; display: grid; place-items: center;
+    background: radial-gradient(120% 90% at 85% 0%, #3434c9 0%, var(--indigo) 45%, var(--indigo-deep) 100%);
+    transition: opacity 0.5s ease;
+  }
+  .splash.fondu { opacity: 0; pointer-events: none; }
+  .splash img { width: min(62vw, 260px); height: auto; border-radius: 16px; box-shadow: 0 18px 40px rgba(5, 5, 50, 0.45); animation: respire 1.6s ease-in-out infinite; }
+  @keyframes respire { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.02); } }
+  .vol { position: fixed; z-index: 41; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; border-radius: 16px; }
 
   /* ---------- Parcours ---------- */
-  .route { position: relative; padding: 26px 18px 8px 18px; margin: 0; list-style: none; }
-  .route::before { /* la ligne du parcours */
-    content: ''; position: absolute; left: 37px; top: 40px; bottom: 56px; width: 4px; border-radius: 4px;
+  .route { position: relative; padding: 28px 18px 4px; margin: 0; list-style: none; }
+  .route::before {
+    content: ''; position: absolute; left: 37px; top: 42px; bottom: 60px; width: 4px; border-radius: 4px;
     background: linear-gradient(var(--gold), var(--blue));
   }
   .route.single::before { display: none; }
@@ -65,16 +107,18 @@
     position: absolute; left: 7px; top: 2px; width: 28px; height: 28px; border-radius: 50%;
     display: grid; place-items: center; font-size: 13px; font-weight: 700;
     background: var(--card); color: var(--indigo); border: 3px solid var(--blue);
-    transition: background 0.25s, border-color 0.25s, color 0.25s;
+    transition: background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
   }
   .stop.start .stop-dot { background: var(--gold); border-color: #fff; color: var(--indigo-deep); box-shadow: 0 0 0 3px var(--gold); }
   .stop.goal .stop-dot { background: var(--blue); border-color: #fff; color: #fff; box-shadow: 0 0 0 3px var(--blue); }
-  .stop-label { margin: 0; font-size: 13px; color: var(--muted); }
-  .stop-title { margin: 1px 0 0; font-size: 19px; font-weight: 600; line-height: 1.3; color: var(--ink); }
+  .stop-head { display: block; width: 100%; text-align: left; background: none; border: none; padding: 0; cursor: default; }
+  .stop-label { display: block; font-size: 13px; color: var(--muted); }
+  .stop-title { display: block; margin-top: 1px; font-size: 19px; font-weight: 600; line-height: 1.3; color: var(--ink); }
   .stop-text { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+  .stop-back { display: none; margin-top: 4px; font-size: 13px; font-weight: 600; color: var(--blue); }
 
   .stop-body { margin-top: 12px; }
-  .plan-card { background: var(--card); border-radius: 20px; border: 1px solid var(--line); overflow: hidden; }
+  .plan-card { background: rgba(255, 255, 255, 0.92); border-radius: 20px; border: 1px solid var(--line); overflow: hidden; box-shadow: 0 10px 30px rgba(26, 26, 140, 0.07); }
   .plan-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 0 16px; }
   .plan-name { font-size: 13px; color: var(--muted); }
   .zoom-btn {
@@ -91,12 +135,10 @@
   .stop.is-done .stop-dot { background: var(--done); border-color: #fff; color: #fff; box-shadow: none; }
   .stop.is-done .stop-title { color: var(--done); }
   .stop.is-done .stop-text, .stop.is-done .stop-body { display: none; }
+  .stop.is-done .stop-head { cursor: pointer; }
+  .stop.is-done .stop-back { display: inline-block; }
   .stop.is-later .stop-body { opacity: 0.55; }
   .stop.is-active .stop-title { color: var(--indigo); }
-
-  /* Arrivée */
-  .arrival { margin: 0 18px 24px 72px; padding: 16px 18px; border-radius: 18px; background: #e9edff; color: var(--indigo); font-size: 15px; }
-  .arrival strong { display: block; font-size: 16px; }
 
   /* ---------- Plan ---------- */
   .plan-iso { position: relative; margin: 0 auto; }
@@ -107,8 +149,7 @@
   .plan-floor.service { fill: #f1f3fb; } .plan-floor.tech { fill: #e4e6f0; } .plan-floor.corridor { fill: #fbfbff; }
   .plan-floor.lobby { fill: #f3f5ff; } .plan-floor.accent { fill: #dde4ff; } .plan-floor.counter { fill: #c9d3ff; }
   .plan-floor.sas { fill: #ffffff; stroke-dasharray: 4 3; }
-  .plan-floor.stairs { fill: url(#stairs); stroke: #9aa3cf; }
-  .plan-floor.outdoor { fill: url(#outdoor); stroke: #c9cfe8; stroke-dasharray: 6 5; }
+  .plan-floor.stairs { stroke: #9aa3cf; } .plan-floor.outdoor { stroke: #c9cfe8; stroke-dasharray: 6 5; }
   .stairs-line { stroke: #9aa3cf; stroke-width: 3; } .outdoor-line { stroke: #dde2f5; stroke-width: 2; }
   .plan-wall { stroke: #9aa3cf; stroke-width: 0.8; stroke-linejoin: round; }
   .plan-wall.x { fill: rgba(255, 255, 255, 0.92); } .plan-wall.y { fill: rgba(226, 231, 250, 0.92); }
@@ -128,25 +169,73 @@
   .marker.vers-gauche .marker-label { left: -14px; transform: none; }
   @keyframes pulse { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
 
-  /* ---------- Barre du bas (zone du pouce) ---------- */
+  /* ---------- Barre du bas ---------- */
   .bar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
     padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-    background: rgba(244, 246, 252, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid var(--line);
-    display: flex; align-items: center; gap: 14px;
+    background: rgba(243, 245, 253, 0.86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(223, 227, 243, 0.9);
+    display: flex; align-items: center; gap: 12px;
   }
-  .progress { display: flex; gap: 6px; flex-shrink: 0; }
-  .progress span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background 0.25s, width 0.25s; }
-  .progress span.on { width: 22px; border-radius: 8px; background: var(--indigo); }
+  .back {
+    flex-shrink: 0; width: 56px; height: 56px; border-radius: 16px; border: 1px solid var(--line); cursor: pointer;
+    background: #fff; color: var(--indigo); display: grid; place-items: center;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .back svg { width: 22px; height: 22px; }
+  .back:disabled { opacity: 0.35; cursor: default; }
+  .back:not(:disabled):active { transform: scale(0.95); }
+  .progress { position: absolute; left: 50%; top: -14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 5px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 4px 14px rgba(26, 26, 140, 0.12); }
+  .progress span { width: 7px; height: 7px; border-radius: 50%; background: var(--line); transition: background 0.25s, width 0.25s; }
+  .progress span.on { width: 20px; border-radius: 8px; background: var(--indigo); }
   .progress span.ok { background: var(--done); }
   .next {
-    flex: 1; min-height: 56px; border: none; border-radius: 16px; cursor: pointer;
+    position: relative; overflow: hidden; flex: 1; min-height: 56px; border: none; border-radius: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
     font-size: 17px; font-weight: 600; color: #fff; background: var(--indigo);
-    box-shadow: 0 8px 20px rgba(26, 26, 140, 0.28);
+    box-shadow: 0 10px 22px rgba(26, 26, 140, 0.28);
+    transition: background 0.35s, box-shadow 0.35s;
   }
   .next:active { transform: scale(0.98); }
-  .next.finished { background: var(--blue); }
+  .next svg { width: 24px; height: 24px; flex-shrink: 0; }
+  .next .coche { display: none; }
+  .next.arrive {
+    background: linear-gradient(135deg, #0f9e47 0%, var(--green) 45%, #22c55e 100%);
+    box-shadow: 0 10px 26px rgba(22, 163, 74, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+  .next.arrive .coche { display: block; }
+  .next.arrive::after { /* reflet qui traverse le bouton */
+    content: ''; position: absolute; top: 0; bottom: 0; width: 60px; left: -80px;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-18deg); animation: reflet 2.8s ease-in-out 0.4s infinite;
+  }
+  @keyframes reflet { 0% { left: -80px; } 45%, 100% { left: 110%; } }
+
+  /* ---------- Arrivée ---------- */
+  .arrivee { position: fixed; inset: 0; z-index: 30; display: none; align-items: flex-end; }
+  .arrivee.ouverte { display: flex; }
+  .voile { position: absolute; inset: 0; background: rgba(12, 12, 79, 0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: apparait 0.3s ease; }
+  .feuille {
+    position: relative; width: 100%; background: #fff; border-radius: 28px 28px 0 0;
+    padding: 34px 24px calc(24px + env(safe-area-inset-bottom, 0px)); text-align: center;
+    animation: monte 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+  }
+  .feuille canvas { position: absolute; left: 0; right: 0; top: -180px; width: 100%; height: 360px; pointer-events: none; }
+  .badge { width: 92px; height: 92px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center;
+    background: radial-gradient(circle at 35% 30%, #4ade80, var(--green) 60%, #0f7a37); box-shadow: 0 14px 30px rgba(22, 163, 74, 0.4), 0 0 0 10px rgba(34, 197, 94, 0.14);
+    animation: pop 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) 0.1s both; }
+  .badge svg { width: 48px; height: 48px; }
+  .badge path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: trace 0.45s ease-out 0.45s forwards; }
+  .feuille h2 { margin: 18px 0 4px; font-size: 26px; color: var(--ink); }
+  .feuille p { margin: 0 auto; max-width: 30ch; color: var(--muted); font-size: 15px; }
+  .feuille .lieu { color: var(--indigo); font-weight: 600; }
+  .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+  .btn-plein { min-height: 54px; border: none; border-radius: 16px; background: var(--indigo); color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; }
+  .btn-texte { min-height: 44px; border: none; background: none; color: var(--blue); font-weight: 600; font-size: 15px; cursor: pointer; }
+  @keyframes apparait { from { opacity: 0; } }
+  @keyframes monte { from { transform: translateY(100%); } }
+  @keyframes pop { from { transform: scale(0.3); opacity: 0; } }
+  @keyframes trace { to { stroke-dashoffset: 0; } }
 
   /* ---------- Plan en grand ---------- */
   .viewer { position: fixed; inset: 0; z-index: 20; background: var(--paper); display: none; flex-direction: column; }
@@ -158,45 +247,21 @@
   .viewer-body { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; padding: 12px; }
   .viewer-hint { text-align: center; font-size: 12px; color: var(--muted); padding: 6px 16px calc(14px + env(safe-area-inset-bottom, 0px)); }
 
-  .error { margin: 32px 20px; }
-  .error h1 { font-size: 22px; margin: 0 0 8px; color: var(--indigo); }
-  .error p { margin: 0; color: var(--muted); }
-  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 4px 24px 20px; }
-
-
-  /* ---------- Logo de la Région : arrivée animée ---------- */
-  .hero { padding-right: 24px; }
-  .logo-slot {
-    position: absolute; z-index: 2; top: calc(18px + env(safe-area-inset-top, 0px)); right: 18px;
-    height: 34px; width: auto; border-radius: 7px; box-shadow: 0 6px 16px rgba(5, 5, 50, 0.35);
-    opacity: 0; transform-origin: 50% 100%;
-  }
-  .logo-slot.pose { opacity: 1; animation: flotte 5s ease-in-out infinite; }
-  @keyframes flotte {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-2px) rotate(-0.6deg); }
-  }
-  .hero-place { padding-right: 120px; }
-  .splash {
-    position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
-    background: radial-gradient(120% 90% at 85% 0%, #3434c9 0%, var(--indigo) 45%, var(--indigo-deep) 100%);
-    transition: opacity 0.5s ease;
-  }
-  .splash.fondu { opacity: 0; pointer-events: none; }
-  .splash img { width: min(62vw, 260px); height: auto; border-radius: 16px; box-shadow: 0 18px 40px rgba(5, 5, 50, 0.45); animation: respire 1.6s ease-in-out infinite; }
-  @keyframes respire { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.02); } }
-  .vol { position: fixed; z-index: 31; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; border-radius: 16px; }
-  @media (prefers-reduced-motion: reduce) { .logo-slot.pose { animation: none; } }
+  .error { margin: 32px 20px; color: var(--muted); }
+  .mot-fin { text-align: center; padding: 10px 28px 22px; color: var(--muted); font-size: 14px; }
+  .mot-fin strong { display: block; color: var(--indigo); font-size: 15px; font-weight: 600; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    .badge path { stroke-dashoffset: 0; }
+    .logo-slot.pose { opacity: 1; }
   }
 </style>
 </head>
 <body>
+<div class="ambiance" aria-hidden="true"><span class="halo a"></span><span class="halo b"></span><span class="halo c"></span><span class="scan"></span></div>
 <div class="splash" id="splash" aria-hidden="true"><img src="logo-rge.jpg" alt=""></div>
 <div id="app"></div>
-<footer>Maison Régionale des Sports, 13 rue Jean Moulin, 54510 Tomblaine</footer>
 
 <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="viewer-title">
   <div class="viewer-head">
@@ -213,12 +278,17 @@
 import { PLANS } from './plans.js';
 
 const BATIMENTS = { D: 'à droite en sortant de l’accueil', G: 'à gauche en sortant de l’accueil' };
-const ENTREES = { D: 'vers_c', G: 'vers_accueil' };   // où l'on arrive dans chaque bâtiment
-const SORTIES = { D: 'vers_d', G: 'vers_g' };         // sortie de l'accueil vers chaque bâtiment
+const ENTREES = { D: 'vers_c', G: 'vers_accueil' };
+const SORTIES = { D: 'vers_d', G: 'vers_g' };
 const etage = (f) => f === -1 ? 'sous-sol' : f === 0 ? 'rez-de-chaussée' : f === 1 ? '1er étage' : `${f}e étage`;
 const Etage = (f) => { const s = etage(f); return s[0].toUpperCase() + s.slice(1); };
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ICONES = {
+  retour: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  coche: '<svg class="coche" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="rgba(255,255,255,0.22)"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  loupe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></svg>',
+};
 
 // ---------- Dessin du plan (même projection que la borne) ----------
 const K = 0.62, SKEW = 0.08;
@@ -288,11 +358,9 @@ function dessinerPlan(plan, marqueurs, mode) {
   const dernier = marqueurs[marqueurs.length - 1];
   const focus = dernier ? (proj(dernier.x, dernier.y)[0] - minX) / w : 0.5;
   const focusY = dernier ? (proj(dernier.x, dernier.y)[1] - minY) / h : 0.5;
-  const plan_ = `<div class="plan-iso" style="${taille}">${svg}${html}</div>`;
-  if (grand) return { html: plan_, focus, focusY };
-  return {
-    html: large ? `<div class="plan-scroll" data-focus="${focus}">${plan_}</div><span class="swipe">Faites glisser le plan pour l’explorer</span>` : plan_,
-  };
+  const contenu = `<div class="plan-iso" style="${taille}">${svg}${html}</div>`;
+  if (grand) return { html: contenu, focus, focusY };
+  return { html: large ? `<div class="plan-scroll" data-focus="${focus}">${contenu}</div><span class="swipe">Faites glisser le plan pour l’explorer</span>` : contenu };
 }
 
 // ---------- Construction de l'itinéraire ----------
@@ -307,31 +375,100 @@ function etapes(cle, cible) {
   const depart = accueil.here && { type: 'start', label: 'Vous partez d’ici', x: accueil.here.x, y: accueil.here.y };
   const but = { type: 'goal', label: cible.label, x: cible.x, y: cible.y };
   const liste = [];
-
   if (cle === 'C:0') {
     liste.push({ type: 'goal', label: 'Depuis l’accueil', titre: `Rejoignez ${cible.label}`, texte: cible.sub, cle: 'C:0', marqueurs: [depart, but] });
     return liste;
   }
   const sortie = trouver(accueil, SORTIES[bat], 0);
-  liste.push({
-    type: 'start', label: 'Départ, accueil du bâtiment C',
-    titre: `Allez vers le bâtiment ${bat}`, texte: `Il se trouve ${BATIMENTS[bat] || 'à côté de l’accueil'}.`,
-    cle: 'C:0', marqueurs: [depart, sortie && { type: 'goal', label: `Bâtiment ${bat}`, x: sortie.x, y: sortie.y }],
-  });
+  liste.push({ type: 'start', label: 'Départ, accueil du bâtiment C', titre: `Allez vers le bâtiment ${bat}`,
+    texte: `Il se trouve ${BATIMENTS[bat] || 'à côté de l’accueil'}.`, cle: 'C:0',
+    marqueurs: [depart, sortie && { type: 'goal', label: `Bâtiment ${bat}`, x: sortie.x, y: sortie.y }] });
   const rdc = PLANS[`${bat}:0`];
   const entree = rdc && trouver(rdc, ENTREES[bat], 0);
   const arrivee = entree && { type: 'start', label: 'Vous arrivez ici', x: entree.x, y: entree.y };
   if (fl === 0) {
     liste.push({ type: 'goal', label: `Bâtiment ${bat}, rez-de-chaussée`, titre: `Rejoignez ${cible.label}`, texte: cible.sub, cle, marqueurs: [arrivee, but] });
   } else {
-    liste.push({
-      type: 'move', label: `Bâtiment ${bat}, rez-de-chaussée`,
-      titre: fl < 0 ? 'Descendez au sous-sol' : `Montez au ${etage(fl)}`,
-      texte: 'Par l’escalier ou l’ascenseur.', cle: `${bat}:0`, marqueurs: [arrivee],
-    });
+    liste.push({ type: 'move', label: `Bâtiment ${bat}, rez-de-chaussée`, titre: fl < 0 ? 'Descendez au sous-sol' : `Montez au ${etage(fl)}`,
+      texte: 'Par l’escalier ou l’ascenseur.', cle: `${bat}:0`, marqueurs: [arrivee] });
     liste.push({ type: 'goal', label: `Bâtiment ${bat}, ${etage(fl)}`, titre: `Rejoignez ${cible.label}`, texte: cible.sub, cle, marqueurs: [but] });
   }
   return liste.map((e) => ({ ...e, marqueurs: e.marqueurs.filter(Boolean) }));
+}
+
+// ---------- Réseau lumineux animé dans l'en-tête ----------
+function reseau(canvas) {
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 0, H = 0, points = [], visible = true, raf = 0;
+  const taille = () => {
+    const r = canvas.getBoundingClientRect(); W = r.width; H = r.height;
+    canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.min(46, Math.round((W * H) / 5200));
+    points = Array.from({ length: n }, (_, i) => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.22, vy: (Math.random() - 0.5) * 0.22,
+      r: Math.random() * 1.4 + 0.8, or: i % 9 === 0, ph: Math.random() * Math.PI * 2,
+    }));
+  };
+  const dessiner = (t) => {
+    ctx.clearRect(0, 0, W, H);
+    const D = 92;
+    for (let i = 0; i < points.length; i++) {
+      const a = points[i];
+      for (let j = i + 1; j < points.length; j++) {
+        const b = points[j]; const dx = a.x - b.x, dy = a.y - b.y; const d = Math.hypot(dx, dy);
+        if (d < D) { ctx.strokeStyle = `rgba(143, 211, 255, ${0.22 * (1 - d / D)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+      }
+    }
+    for (const p of points) {
+      const lueur = 0.55 + 0.45 * Math.sin(t / 900 + p.ph);
+      ctx.fillStyle = p.or ? `rgba(255, 201, 79, ${0.6 + 0.4 * lueur})` : `rgba(200, 225, 255, ${0.35 + 0.45 * lueur})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.or ? p.r + 0.8 : p.r, 0, Math.PI * 2); ctx.fill();
+    }
+  };
+  const boucle = (t) => {
+    for (const p of points) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -10) p.x = W + 10; if (p.x > W + 10) p.x = -10;
+      if (p.y < -10) p.y = H + 10; if (p.y > H + 10) p.y = -10;
+    }
+    dessiner(t);
+    raf = visible && !document.hidden ? requestAnimationFrame(boucle) : 0;
+  };
+  taille();
+  if (reduit) { dessiner(0); return; }
+  raf = requestAnimationFrame(boucle);
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && !raf) raf = requestAnimationFrame(boucle); }).observe(canvas);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && visible && !raf) raf = requestAnimationFrame(boucle); });
+  window.addEventListener('resize', taille);
+}
+
+// ---------- Petite gerbe de confettis à l'arrivée ----------
+function confettis(canvas) {
+  if (reduit) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const r = canvas.getBoundingClientRect(); const W = r.width, H = r.height;
+  canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const couleurs = ['#22c55e', '#3d5eff', '#ffc94f', '#8fd3ff', '#1a1a8c'];
+  const parts = Array.from({ length: 70 }, () => {
+    const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.9, v = 4 + Math.random() * 5.5;
+    return { x: W / 2, y: H / 2 + 20, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, w: 5 + Math.random() * 5, h: 3 + Math.random() * 4,
+      rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: couleurs[(Math.random() * couleurs.length) | 0] };
+  });
+  const debut = performance.now();
+  const anim = (t) => {
+    const age = (t - debut) / 1000;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of parts) {
+      p.vy += 0.18; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save(); ctx.globalAlpha = Math.max(0, 1 - age / 1.7); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    }
+    if (age < 1.8) requestAnimationFrame(anim); else ctx.clearRect(0, 0, W, H);
+  };
+  requestAnimationFrame(anim);
 }
 
 // ---------- Affichage ----------
@@ -343,78 +480,112 @@ const cible = planCible && id && trouver(planCible, id, n);
 
 if (!cible) {
   document.body.style.paddingBottom = '0';
-  app.innerHTML = `<div class="hero"><img class="logo-slot" id="logo" src="logo-rge.jpg" alt="La Région Grand Est"><p class="hero-place">Maison Régionale des Sports</p><h1>Itinéraire introuvable</h1></div>
-    <div class="error"><p>Ce lien ne correspond à aucun lieu. Scannez de nouveau le QR code sur la borne d’accueil.</p></div>`;
+  app.innerHTML = `<header class="hero"><canvas aria-hidden="true"></canvas><img class="logo-slot" id="logo" src="logo-rge.jpg" alt="La Région Grand Est">
+      <p class="hero-place">Maison Régionale des Sports</p><h1>Itinéraire introuvable</h1></header>
+    <div class="error">Ce lien ne correspond à aucun lieu. Scannez de nouveau le QR code sur la borne d’accueil.</div>`;
+  reseau(app.querySelector('.hero canvas'));
 } else {
   const [bat, f] = cle.split(':');
   const liste = etapes(cle, cible);
   document.title = `${cible.label} – Votre itinéraire`;
   let actif = 0;
 
-  const loupe = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></svg>`;
   let html = `<header class="hero">
+      <canvas aria-hidden="true"></canvas>
       <img class="logo-slot" id="logo" src="logo-rge.jpg" alt="La Région Grand Est">
       <p class="hero-place">Votre itinéraire vers</p>
       <h1>${esc(cible.label)}</h1>
       ${cible.sub ? `<p class="hero-sub">${esc(cible.sub)}</p>` : ''}
       <div class="chips"><span class="chip gold">Bâtiment ${esc(bat)}</span><span class="chip">${esc(Etage(Number(f)))}</span></div>
     </header>
-    <ol class="route${liste.length === 1 ? ' single' : ''}" id="route">`;
+    <ol class="route${liste.length === 1 ? ' single' : ''}">`;
   liste.forEach((e, i) => {
     const dessin = dessinerPlan(PLANS[e.cle], e.marqueurs);
-    const dot = e.type === 'goal' ? '' : i + 1;
-    html += `<li class="stop ${e.type}" data-i="${i}">
-      <span class="stop-dot" aria-hidden="true">${dot}</span>
-      <p class="stop-label">${esc(e.label)}</p>
-      <h2 class="stop-title">${esc(e.titre)}</h2>
+    html += `<li class="stop ${e.type}">
+      <span class="stop-dot" aria-hidden="true"></span>
+      <button class="stop-head" data-retour="${i}" tabindex="-1">
+        <span class="stop-label">${esc(e.label)}</span>
+        <span class="stop-title">${esc(e.titre)}</span>
+        <span class="stop-back">Revoir cette étape</span>
+      </button>
       ${e.texte ? `<p class="stop-text">${esc(e.texte)}</p>` : ''}
       <div class="stop-body"><div class="plan-card">
         <div class="plan-head"><span class="plan-name">${esc(PLANS[e.cle].titre)}</span>
-          <button class="zoom-btn" data-zoom="${i}">${loupe}Agrandir</button></div>
+          <button class="zoom-btn" data-zoom="${i}">${ICONES.loupe}Agrandir</button></div>
         <div class="plan-area">${dessin.html}</div>
       </div></div>
     </li>`;
   });
   html += `</ol>
-    <div class="arrival" id="arrival" hidden><strong>Vous êtes arrivé.</strong>Besoin d’aide ? L’accueil, au bâtiment C, est ouvert du lundi au vendredi, de 8 h à 17 h.</div>
+    <p class="mot-fin"><strong>Bonne visite à la Maison Régionale des Sports !</strong>Et bon sport à vous.</p>
     <nav class="bar" aria-label="Progression">
-      ${liste.length > 1 ? `<div class="progress" id="progress">${liste.map(() => '<span></span>').join('')}</div>` : ''}
-      <button class="next" id="next"></button>
-    </nav>`;
+      ${liste.length > 1 ? `<div class="progress">${liste.map(() => '<span></span>').join('')}</div>` : ''}
+      <button class="back" id="back" aria-label="Étape précédente">${ICONES.retour}</button>
+      <button class="next" id="next">${ICONES.coche}<span id="next-label"></span></button>
+    </nav>
+    <div class="arrivee" id="arrivee" role="dialog" aria-modal="true" aria-labelledby="arrivee-titre">
+      <div class="voile" data-fermer></div>
+      <div class="feuille">
+        <canvas aria-hidden="true"></canvas>
+        <div class="badge"><svg viewBox="0 0 48 48" fill="none"><path d="M14 25l7 7 14-15" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2 id="arrivee-titre">Vous êtes arrivé !</h2>
+        <p>Bienvenue à <span class="lieu">${esc(cible.label)}</span>. Bonne réunion, et bonne journée à la Maison Régionale des Sports.</p>
+        <div class="actions">
+          <button class="btn-plein" data-fermer>Fermer</button>
+          <button class="btn-texte" id="revoir">Revoir l’itinéraire</button>
+        </div>
+      </div>
+    </div>`;
   app.innerHTML = html;
+  reseau(app.querySelector('.hero canvas'));
 
-  // Plans très larges : on centre sur le point d'intérêt
   document.querySelectorAll('.plan-scroll').forEach((box) => {
     box.scrollLeft = Number(box.dataset.focus || 0.5) * box.scrollWidth - box.clientWidth / 2;
   });
 
   const stops = [...document.querySelectorAll('.stop')];
   const btn = document.getElementById('next');
-  const dots = [...document.querySelectorAll('#progress span')];
-  const arrival = document.getElementById('arrival');
+  const label = document.getElementById('next-label');
+  const back = document.getElementById('back');
+  const dots = [...document.querySelectorAll('.progress span')];
+  const arrivee = document.getElementById('arrivee');
+  const defile = (el) => el.scrollIntoView({ behavior: reduit ? 'auto' : 'smooth', block: 'start' });
 
   function maj(defiler) {
-    const fini = actif >= liste.length;
     stops.forEach((s, i) => {
       s.classList.toggle('is-done', i < actif);
       s.classList.toggle('is-active', i === actif);
       s.classList.toggle('is-later', i > actif);
-      const d = s.querySelector('.stop-dot');
-      if (i < actif) d.textContent = '✓';
-      else d.textContent = liste[i].type === 'goal' ? '' : i + 1;
+      s.querySelector('.stop-dot').textContent = i < actif ? '✓' : liste[i].type === 'goal' ? '' : i + 1;
+      s.querySelector('.stop-head').tabIndex = i < actif ? 0 : -1;
     });
     dots.forEach((d, i) => { d.className = i < actif ? 'ok' : i === actif ? 'on' : ''; });
-    arrival.hidden = !fini;
-    if (fini) { btn.textContent = 'Revoir l’itinéraire'; btn.classList.add('finished'); }
-    else { btn.classList.remove('finished'); btn.textContent = actif === liste.length - 1 ? 'Je suis arrivé' : 'Étape suivante'; }
-    if (defiler) {
-      const cibleScroll = fini ? arrival : stops[actif];
-      cibleScroll.scrollIntoView({ behavior: reduit ? 'auto' : 'smooth', block: 'start' });
-    }
+    const dernier = actif === liste.length - 1;
+    btn.classList.toggle('arrive', dernier);
+    label.textContent = dernier ? 'Je suis arrivé' : 'Étape suivante';
+    back.disabled = actif === 0;
+    if (defiler) defile(stops[actif]);
   }
+  function ouvrirArrivee() {
+    arrivee.classList.add('ouverte');
+    document.body.style.overflow = 'hidden';
+    if (navigator.vibrate) navigator.vibrate(30);
+    requestAnimationFrame(() => confettis(arrivee.querySelector('.feuille canvas')));
+    arrivee.querySelector('.btn-plein').focus();
+  }
+  function fermerArrivee() { arrivee.classList.remove('ouverte'); document.body.style.overflow = ''; }
+
   btn.addEventListener('click', () => {
-    if (actif >= liste.length) { actif = 0; maj(false); window.scrollTo({ top: 0, behavior: reduit ? 'auto' : 'smooth' }); return; }
+    if (actif === liste.length - 1) { ouvrirArrivee(); return; }
     actif += 1; maj(true);
+  });
+  back.addEventListener('click', () => { if (actif > 0) { actif -= 1; maj(true); } });
+  document.querySelectorAll('[data-retour]').forEach((b) => b.addEventListener('click', () => {
+    const i = Number(b.dataset.retour); if (i < actif) { actif = i; maj(true); }
+  }));
+  arrivee.querySelectorAll('[data-fermer]').forEach((b) => b.addEventListener('click', fermerArrivee));
+  document.getElementById('revoir').addEventListener('click', () => {
+    fermerArrivee(); actif = 0; maj(false); window.scrollTo({ top: 0, behavior: reduit ? 'auto' : 'smooth' });
   });
   maj(false);
 
@@ -434,35 +605,35 @@ if (!cible) {
     });
     document.getElementById('viewer-close').focus();
   }));
-  const fermer = () => { viewer.classList.remove('open'); document.body.style.overflow = ''; };
-  document.getElementById('viewer-close').addEventListener('click', fermer);
-  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') fermer(); });
+  const fermerPlan = () => { viewer.classList.remove('open'); document.body.style.overflow = ''; };
+  document.getElementById('viewer-close').addEventListener('click', fermerPlan);
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { fermerPlan(); fermerArrivee(); } });
 }
+
 // ---------- Arrivée du logo : il quitte l'écran de chargement et « atterrit » en haut à droite ----------
 function atterrir() {
   const splash = document.getElementById('splash');
   const logo = document.getElementById('logo');
   if (!splash || !logo) return;
   const source = splash.querySelector('img');
-  const fin = () => { logo.classList.add('pose'); splash.remove(); };
-  if (reduit || !source.complete || !source.naturalWidth || !logo.animate) { splash.classList.add('fondu'); setTimeout(fin, 500); logo.style.opacity = 1; return; }
+  const poser = () => { logo.style.opacity = ''; logo.classList.add('pose'); splash.remove(); };
+  if (reduit || !source.complete || !source.naturalWidth || !logo.animate) { splash.classList.add('fondu'); setTimeout(poser, 500); return; }
   const a = source.getBoundingClientRect(), b = logo.getBoundingClientRect();
   const vol = source.cloneNode(); vol.className = 'vol';
   vol.style.width = `${a.width}px`; vol.style.height = `${a.height}px`;
   document.body.appendChild(vol);
   source.style.visibility = 'hidden';
   splash.classList.add('fondu');
-  const k = b.width / a.width;               // taille d'arrivée
+  const k = b.width / a.width;
   const T = (x, y, sx, sy = sx) => `translate(${x}px, ${y}px) scale(${sx}, ${sy})`;
   const bx = b.left, by = b.top, h = b.height;
-  // Petit rebond à l'arrivée : il descend un peu trop, s'écrase légèrement, puis se pose
   vol.animate([
     { transform: T(a.left, a.top, 1), offset: 0, easing: 'cubic-bezier(0.55, 0, 0.25, 1)' },
     { transform: T(bx, by - h * 0.55, k * 1.04), offset: 0.68, easing: 'ease-in' },
     { transform: T(bx - b.width * 0.03, by + h * 0.08, k * 1.06, k * 0.88), offset: 0.8, easing: 'ease-out' },
     { transform: T(bx, by - h * 0.12, k * 0.98, k * 1.03), offset: 0.9, easing: 'ease-in-out' },
     { transform: T(bx, by, k), offset: 1 },
-  ], { duration: 1150, fill: 'forwards' }).onfinish = () => { logo.style.opacity = ''; logo.classList.add('pose'); vol.remove(); splash.remove(); };
+  ], { duration: 1150, fill: 'forwards' }).onfinish = () => { poser(); vol.remove(); };
 }
 const depart = performance.now();
 const lancer = () => setTimeout(atterrir, Math.max(0, 900 - (performance.now() - depart)));
